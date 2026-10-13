@@ -1,0 +1,966 @@
+/*
+  ============================================================
+  ЧТО ТАКОЕ CSS?
+  CSS (Cascading Style Sheets) — каскадные таблицы стилей.
+  CSS отвечает за ВНЕШНИЙ ВИД: цвета, шрифты, отступы,
+  расположение элементов, анимации.
+  
+  КАСКАДНЫЕ — потому что стили "каскадом" накладываются 
+  друг на друга: браузерные → наши → более специфичные.
+  
+  СТРУКТУРА ПРАВИЛА:
+  селектор {
+    свойство: значение;
+  }
+  
+  ВИДЫ СЕЛЕКТОРОВ:
+  .класс      — элемент с class="класс"
+  #id         — элемент с id="id" (уникальный)
+  тег         — все элементы этого типа (p, h1, div)
+  тег.класс   — тег с определённым классом
+  ============================================================
+*/
+
+/* ==================== ПЕРЕМЕННЫЕ ==================== */
+/*
+  CSS Custom Properties (переменные) — задаём цвета и размеры
+  в одном месте. Потом используем через var(--имя).
+  
+  Если захочешь поменять цветовую схему — достаточно изменить
+  переменные здесь, и весь сайт обновится!
+  
+  :root — это псевдокласс, означающий корневой элемент (html).
+  Переменные в :root доступны на всей странице.
+*/
+:root {
+  /* Цвета фона */
+  --bg-primary: #0a0a0f;        /* Основной тёмный фон */
+  --bg-secondary: #12121a;      /* Альтернативный фон для секций */
+  --bg-card: #1a1a2e;           /* Фон карточек */
+  --bg-card-hover: #222240;     /* Фон карточки при наведении */
+  
+  /* Цвета текста */
+  --text-primary: #e8e8f0;      /* Основной текст */
+  --text-secondary: #8888a0;    /* Вторичный текст (приглушённый) */
+  --text-muted: #55556a;        /* Совсем бледный текст */
+  
+  /* Акцентные цвета — фиолетово-голубой градиент */
+  --accent-start: #7c5bf5;      /* Начало градиента (фиолетовый) */
+  --accent-end: #38bdf8;        /* Конец градиента (голубой) */
+  --accent-glow: rgba(124, 91, 245, 0.3); /* Свечение */
+  
+  /* Размеры */
+  --max-width: 1100px;          /* Максимальная ширина контента */
+  --nav-height: 72px;           /* Высота навигации */
+  --radius: 12px;               /* Скругление углов */
+  --radius-lg: 20px;            /* Большое скругление */
+  
+  /* Тени */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 40px var(--accent-glow);
+  
+  /* Анимации — используем плавные кривые Безье */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ==================== СБРОС СТИЛЕЙ ==================== */
+/*
+  Каждый браузер добавляет свои стили по умолчанию
+  (отступы у body, буллеты у списков и т.д.).
+  
+  "Сброс" убирает эти различия, чтобы сайт выглядел
+  одинаково во всех браузерах.
+  
+  * — универсальный селектор, выбирает ВСЕ элементы.
+  
+  box-sizing: border-box — отступы (padding) и рамки (border) 
+  НЕ увеличивают общий размер элемента. Это удобнее для вёрстки.
+*/
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  /* scroll-behavior: smooth — плавная прокрутка при клике на якорные ссылки */
+  scroll-behavior: smooth;
+  /* scroll-padding-top — отступ сверху при прокрутке к якорю (чтобы навбар не перекрывал) */
+  scroll-padding-top: var(--nav-height);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;  /* Межстрочный интервал — 1.7 от размера шрифта */
+  overflow-x: hidden; /* Убираем горизонтальный скролл */
+  -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов на Mac */
+}
+
+/* Убираем стили у ссылок */
+a {
+  color: inherit;       /* Наследует цвет от родителя */
+  text-decoration: none; /* Убираем подчёркивание */
+}
+
+/* Убираем буллеты у списков */
+ul {
+  list-style: none;
+}
+
+/* Картинки не выходят за пределы контейнера */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+
+/* ==================== УТИЛИТЫ ==================== */
+/*
+  Utility-классы — переиспользуемые классы для общих задач.
+  .container — ограничивает ширину контента по центру.
+*/
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;             /* Центрируем по горизонтали */
+  padding: 0 24px;            /* Отступы по бокам */
+}
+
+.gradient-text {
+  /*
+    background: linear-gradient — создаём градиент.
+    -webkit-background-clip: text — обрезаем фон по форме текста.
+    color: transparent — делаем текст прозрачным.
+    Результат: текст "заливается" градиентом!
+  */
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* ==================== НАВИГАЦИЯ ==================== */
+/*
+  position: fixed — навигация "прилипает" к верху экрана
+  и остаётся видимой при прокрутке.
+  
+  z-index: 1000 — навигация располагается поверх всех элементов.
+  Чем больше z-index, тем "выше" элемент в стопке слоёв.
+*/
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  z-index: 1000;
+  transition: background-color var(--transition-smooth), 
+              box-shadow var(--transition-smooth);
+}
+
+/* 
+  Класс .scrolled добавляется через JavaScript при прокрутке.
+  backdrop-filter: blur — размывает фон за навигацией (эффект "стекла").
+*/
+.navbar.scrolled {
+  background-color: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.nav-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;                    /* Flexbox — мощный способ расположения элементов */
+  align-items: center;             /* Выравнивание по вертикали */
+  justify-content: space-between;  /* Логотип слева, ссылки справа */
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  transition: transform var(--transition-fast);
+}
+
+.nav-logo:hover {
+  transform: scale(1.05); /* Чуть увеличиваем при наведении */
+}
+
+.logo-bracket {
+  color: var(--accent-start);
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px; /* Расстояние между ссылками */
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  /* 
+    transition — плавное изменение свойства.
+    Без transition изменения были бы мгновенными и "дёргаными".
+  */
+  transition: color var(--transition-fast);
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+/* 
+  Подчёркивание при наведении — создаём через ::after.
+  ::after — псевдоэлемент, который добавляется ПОСЛЕ содержимого.
+  Мы делаем тонкую полоску внизу, которая "выезжает" при hover.
+*/
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+  transition: width var(--transition-smooth);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Кнопка-гамбургер для мобильных */
+.nav-toggle {
+  display: none; /* Скрыта на десктопе */
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+
+/* ==================== HERO ==================== */
+.hero {
+  min-height: 100vh;       /* Занимает минимум весь экран */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Контент по центру вертикально */
+  padding-top: var(--nav-height);
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+  Фоновый градиентный шар — чисто декоративный эффект.
+  Создаём через ::before псевдоэлемент.
+  radial-gradient — круговой градиент.
+  filter: blur — размытие.
+*/
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(124, 91, 245, 0.15), transparent 70%);
+  filter: blur(60px);
+  pointer-events: none; /* Не мешает кликам */
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.1), transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Два равных столбца */
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 1; /* Контент поверх декоративных фонов */
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(124, 91, 245, 0.1);
+  border: 1px solid rgba(124, 91, 245, 0.2);
+  border-radius: 100px; /* Полностью скруглённый */
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--accent-start);
+  margin-bottom: 24px;
+}
+
+/* Пульсирующая точка — показывает "активность" */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e; /* Зелёный */
+  border-radius: 50%;
+  /*
+    animation — запускаем анимацию pulse.
+    2s — длительность одного цикла.
+    infinite — повторять бесконечно.
+    Анимация описана ниже через @keyframes.
+  */
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/*
+  @keyframes — описание анимации по кадрам.
+  0% — начальное состояние.
+  50% — середина анимации.
+  100% — конечное состояние (= начальное для цикла).
+*/
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); 
+  }
+  50% { 
+    opacity: 0.7; 
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); 
+  }
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 5vw, 3.5rem); /* clamp — адаптивный размер */
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.hero-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin-bottom: 32px;
+}
+
+/* Кнопки */
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap; /* Переносятся на новую строку при нехватке места */
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+}
+
+/* Основная кнопка — с градиентом */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);  /* Приподнимается */
+  box-shadow: 0 0 50px var(--accent-glow);
+}
+
+/* Контурная кнопка */
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent-start);
+  background: rgba(124, 91, 245, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Декоративное окно с кодом */
+.code-window {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  /* Поворачиваем карточку в 3D для эффекта глубины */
+  transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+  transition: transform var(--transition-smooth);
+}
+
+.code-window:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Три цветные точки (как в macOS) */
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.dot-red { background: #ff5f57; }
+.dot-yellow { background: #febc2e; }
+.dot-green { background: #28c840; }
+
+.code-filename {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.code-body {
+  padding: 20px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+/* Подсветка синтаксиса (вручную через классы) */
+.code-keyword { color: #c678dd; }     /* Ключевые слова: from, import, def */
+.code-string { color: #98c379; }      /* Строки: "hello" */
+.code-function { color: #61afef; }    /* Имена функций */
+.code-decorator { color: #e5c07b; }   /* Декораторы: @app.get */
+
+/* Стрелка прокрутки вниз */
+.scroll-indicator {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg);
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(8px); }
+}
+
+
+/* ==================== СЕКЦИИ ==================== */
+.section {
+  padding: 100px 0;
+}
+
+.section-alt {
+  background-color: var(--bg-secondary);
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 48px;
+  letter-spacing: -0.02em;
+}
+
+.section-number {
+  color: var(--accent-start);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+
+/* ==================== ОБО МНЕ ==================== */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.about-text p {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.about-text strong {
+  color: var(--text-primary);
+}
+
+.about-stats {
+  display: grid;
+  gap: 16px;
+}
+
+/* Карточки статистики */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all var(--transition-fast);
+}
+
+.stat-card:hover {
+  border-color: rgba(124, 91, 245, 0.3);
+  background: var(--bg-card-hover);
+  transform: translateX(8px); /* Сдвигается вправо при наведении */
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+
+/* ==================== НАВЫКИ ==================== */
+/*
+  CSS Grid — мощная система для создания сеток.
+  grid-template-columns: repeat(4, 1fr) — 4 равных столбца.
+  1fr = 1 доля свободного пространства.
+*/
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.skill-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  text-align: center;
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Градиентная полоска сверху при наведении */
+.skill-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+  transform: scaleX(0); /* Изначально скрыта */
+  transition: transform var(--transition-smooth);
+}
+
+.skill-card:hover::before {
+  transform: scaleX(1); /* "Выезжает" при наведении */
+}
+
+.skill-card:hover {
+  border-color: rgba(124, 91, 245, 0.2);
+  background: var(--bg-card-hover);
+  transform: translateY(-4px);
+}
+
+.skill-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.skill-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.skill-list li {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+
+/* ==================== ПРОЕКТЫ ==================== */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  border-color: rgba(124, 91, 245, 0.3);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-glow);
+}
+
+.project-image {
+  aspect-ratio: 16 / 10; /* Соотношение сторон */
+  overflow: hidden;
+}
+
+.project-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(124, 91, 245, 0.1), rgba(56, 189, 248, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-emoji {
+  font-size: 3rem;
+}
+
+.project-info {
+  padding: 24px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  background: rgba(124, 91, 245, 0.12);
+  color: var(--accent-start);
+  border-radius: 100px;
+}
+
+.project-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.project-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.project-links {
+  display: flex;
+  gap: 16px;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.project-link:hover {
+  color: var(--accent-start);
+}
+
+
+/* ==================== КОНТАКТ ==================== */
+.contact-content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.contact-text {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+.contact-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-smooth);
+}
+
+.contact-card:hover {
+  border-color: rgba(124, 91, 245, 0.3);
+  background: var(--bg-card-hover);
+  transform: translateY(-4px);
+}
+
+.contact-icon {
+  font-size: 1.8rem;
+}
+
+.contact-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.contact-value {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+
+/* ==================== ФУТЕР ==================== */
+.footer {
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.footer-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+
+/* ==================== АНИМАЦИИ ПОЯВЛЕНИЯ ==================== */
+/*
+  Элементы появляются при скролле — это делает JavaScript
+  через Intersection Observer.
+  
+  Начальное состояние — невидимый и смещённый вниз.
+  Класс .visible добавляется через JS, когда элемент
+  попадает в зону видимости.
+*/
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ==================== АДАПТИВНОСТЬ (RESPONSIVE) ==================== */
+/*
+  @media — медиа-запросы.
+  Позволяют менять стили в зависимости от ширины экрана.
+  
+  max-width: 768px — стили применяются на экранах до 768px
+  (это примерно ширина планшета в портретной ориентации).
+  
+  Подход "Mobile First" — сначала пишем для телефонов,
+  потом расширяем для десктопа. Но здесь мы используем
+  "Desktop First" — это проще для начинающих.
+*/
+
+/* Планшеты и небольшие ноутбуки */
+@media (max-width: 1024px) {
+  .hero-content {
+    grid-template-columns: 1fr; /* Одна колонка вместо двух */
+    text-align: center;
+  }
+  
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .hero-visual {
+    display: none; /* Скрываем окно с кодом на планшетах */
+  }
+  
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 столбца вместо 4 */
+  }
+  
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* Мобильные телефоны */
+@media (max-width: 768px) {
+  /* Показываем кнопку-гамбургер */
+  .nav-toggle {
+    display: flex;
+  }
+  
+  /* Мобильное меню — скрыто по умолчанию */
+  .nav-links {
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 20px;
+    transform: translateY(-100%); /* Спрятано вверх за экран */
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition-smooth);
+  }
+  
+  /* Класс .active — меню открыто (добавляется через JS) */
+  .nav-links.active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  .nav-link {
+    padding: 12px 0;
+    font-size: 1.1rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .section {
+    padding: 60px 0;
+  }
+  
+  .skills-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .projects-grid {
+    grid-template-columns: 1fr; /* Одна карточка в строке */
+  }
+  
+  .contact-links {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Маленькие телефоны */
+@media (max-width: 480px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
